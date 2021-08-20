@@ -1,7 +1,12 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+
 const app = express();
 const multer = require('multer');
 const path = require('path');
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const fs = require('fs');
 
@@ -36,5 +41,12 @@ app.post('/single', upload.single('uploadFile'), (req, res) => {
     }
 });
 
+const students = require('./routes/students.routes');
+const users = require('./routes/users.routes');
+
+app.use('/students',  students);
+app.use('/users', users);
+
+require('./dbs/mongo_db');
 
 app.listen(3000, ()=> console.log('Server started on port 3000'));

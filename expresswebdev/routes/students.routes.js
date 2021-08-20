@@ -1,31 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-router.post('/', (req, res) => {
-    const body = req.body;
-    console.log(body, '*******');
-    let data = [];
-    fs.readFile('./students.json',  'utf-8',(err,result) => {
-        if (err) throw err
-            else {
-            console.log("result: ",result);
-            data = JSON.parse(result);
-            console.log('data: ',data, typeof(data));
-            body.id = data.length+1;
-            data.push(body);
-            data= JSON.stringify(data);
-            fs.writeFile('students.json', data, (err, result) => {
-                if(!err) {
-                    console.log(err, result, "Wrote students to file *********");
-                    return res.send(data);
-                }
-                console.log(err, result, ' Error');
-            });
-        }
-    });           
-});
+const bodyParser = require('body-parser');
+const jsonParser = bodyParser.json();
 
-router.get('/', (req, res) => { 
+const fs = require('fs');
+
+router.get('/',  (req, res) => { 
     console.log("Getting /student");     
     fs.readFile('./students.json',  'utf-8',(err,result) => {
         if (err) throw err
@@ -37,10 +18,36 @@ router.get('/', (req, res) => {
     });       
 }); 
 
-router.patch('/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    console.log('id: ', id);
+router.post('/', jsonParser, (req, res) => {
+    let body = req.body;
+    console.log(req, JSON.stringify(body), '*******');
+    let data = [];
+    
+        fs.readFile('./students.json',  'utf-8',(err,result) => {
+            if (err) throw err
+                else {
+                console.log("result: ",result);
+                data = JSON.parse(result);
+                console.log('data: ',data, typeof(data), data[data.length-1].id);
+            
+                body.id = data[data.length-1].id+1;
+                data.push(body);
+                data= JSON.stringify(data);
+                fs.writeFile('./students.json', data, (err, result) => {
+                    if(!err) {
+                        console.log(err, result, "Wrote students to file *********");
+                        return res.send(data);
+                    }
+                    console.log(err, result, ' Error');
+                });
+            }
+        });            
+});
+
+router.patch('/:id', jsonParser,(req, res) => {
+    const id = parseInt(req.params.id);   
     const body = req.body;
+    console.log('body, id: ',  JSON.stringify(body), id);
     fs.readFile('./students.json',  'utf-8',(err,result) => {
         if (err) throw err
             else {
@@ -55,7 +62,7 @@ router.patch('/:id', (req, res) => {
                     let data= JSON.stringify(result);
                     fs.writeFile('students.json', data, (err, result) => {
                         if(!err) {
-                            console.log(err, result, "Wrote students to file *********");
+                            console.log(err, result, "Updated Students *********");
                             return res.send(data);
                         }
                         console.log(err, result, ' Error');
@@ -84,3 +91,5 @@ router.delete('/:id', (req, res) => {
             }
     });     
 }); 
+
+module.exports = router;
