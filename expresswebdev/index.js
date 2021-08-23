@@ -43,9 +43,11 @@ app.post('/single', upload.single('uploadFile'), (req, res) => {
 
 const students = require('./routes/students.routes');
 const users = require('./routes/users.routes');
+const login = require('./routes/login.routes');
 
 app.use('/students',  students);
 app.use('/users', users);
+app.use('/login', login);
 
 require('./dbs/mongo_db');
 
