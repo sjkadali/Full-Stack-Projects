@@ -41,12 +41,30 @@ app.post('/single', upload.single('uploadFile'), (req, res) => {
     }
 });
 
+const { validateJWT } = require('./utils/jwt');
+
+app.use(express.json());
+
+async function validateToken(req, res, next) {
+  const token = req.headers.authorization;
+  if(!token) {
+    return res.status(400).json({ message: 'Token Not found..' });
+  }
+  const result = await validateJWT(token);
+  next();
+}
+
+app.use('/secure', validateToken);
+
+app.use(express.static('./public'));
+
+
 const students = require('./routes/students.routes');
 const users = require('./routes/users.routes');
 const login = require('./routes/login.routes');
 
-app.use('/students',  students);
-app.use('/users', users);
+app.use('/secure/students',  students);
+app.use('/secure/users', users);
 app.use('/login', login);
 
 require('./dbs/mongo_db');
